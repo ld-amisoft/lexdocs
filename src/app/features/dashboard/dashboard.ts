@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Icon } from '../../shared/icon';
+import { Session } from '../../shared/session';
 
 // Inicio = Gestor documental (igual en forma a MINVU, skin LexDocs).
 @Component({
@@ -24,13 +25,18 @@ import { Icon } from '../../shared/icon';
         <div class="muted">Adjunta antecedentes o documentos requeridos a un expediente en curso.</div>
         <span class="link-arrow">Subir archivo →</span>
       </a>
-      <a class="card action-card orange" routerLink="/app/ingresos/expediente">
-        <span class="icon-chip chip-orange"><app-icon name="plus" [size]="22" /></span>
-        <div class="name" style="font-weight:700;font-size:16px">Ingresar nuevo expediente</div>
-        <div class="muted">Inicia un nuevo expediente completando el formulario de ingreso.</div>
-        <span class="link-arrow">Inicia expediente →</span>
-      </a>
+      @if (!esCiudadano()) {
+        <a class="card action-card orange" routerLink="/app/ingresos/expediente">
+          <span class="icon-chip chip-orange"><app-icon name="plus" [size]="22" /></span>
+          <div class="name" style="font-weight:700;font-size:16px">Ingresar nuevo expediente</div>
+          <div class="muted">Inicia un nuevo expediente completando el formulario de ingreso.</div>
+          <span class="link-arrow">Inicia expediente →</span>
+        </a>
+      }
     </div>
   `,
 })
-export class Dashboard {}
+export class Dashboard {
+  private session = inject(Session);
+  esCiudadano = computed(() => this.session.role() === 'Ciudadano');
+}

@@ -516,21 +516,27 @@ export const documentoPermisos = [
 ];
 
 // ---- Bandeja de Firmas (estructura del gestor: nombre, tipo, materia, expediente, doc, fecha, estado, tipo firma, visaciones) ----
-export const firmaColumns: Column[] = [
-  { key: 'nombre', label: 'Nombre' }, { key: 'tipoDoc', label: 'Tipo documento' },
-  { key: 'materia', label: 'Materia' }, { key: 'expediente', label: 'Expediente' },
-  { key: 'documento', label: 'Documento' }, { key: 'fechaCreacion', label: 'Fecha creación' },
-  { key: 'estado', label: 'Estado', type: 'badge' }, { key: 'tipoFirma', label: 'Tipo firma' },
-  { key: 'visaciones', label: 'Firmas y visaciones' },
-];
-export const documentosPorFirmar = [
-  { nombre: '📄 Resolucion_452.pdf', tipoDoc: 'Adjunto', materia: 'Documento secundario', expediente: '2026-00875-A-000039', documento: '75631', fechaCreacion: '06-03-2026', estado: 'Pendiente', tipoFirma: '—', visaciones: '👥 1' },
-  { nombre: '📝 Oficio_conductor.docx', tipoDoc: 'Resolución', materia: 'Oficio de despacho', expediente: '2026-00875-A-000033', documento: '75435', fechaCreacion: '05-03-2026', estado: 'Pendiente', tipoFirma: '—', visaciones: '👥 2' },
-  { nombre: '📝 Acta_notificacion.docx', tipoDoc: 'Antecedente', materia: 'Notificación 3', expediente: '2026-00875-A-000031', documento: '75305', fechaCreacion: '27-02-2026', estado: 'Fallido', tipoFirma: 'Firma Gob', visaciones: '👥 1' },
-  { nombre: '📄 Anexo_planos.pdf', tipoDoc: 'Adjunto', materia: 'Documento secundario', expediente: '2026-00874-A-000013', documento: '72225', fechaCreacion: '09-01-2026', estado: 'Pendiente', tipoFirma: '—', visaciones: '👥 1' },
-  { nombre: '📑 Presentacion.pptx', tipoDoc: 'Adjunto', materia: 'Documento secundario', expediente: '2026-00874-A-000010', documento: '72162', fechaCreacion: '09-01-2026', estado: 'Pendiente', tipoFirma: '—', visaciones: '👥 1' },
-  { nombre: '🖼️ Croquis.png', tipoDoc: 'Adjunto', materia: 'Documento secundario', expediente: '2026-00874-A-000010', documento: '72158', fechaCreacion: '09-01-2026', estado: 'Procesado', tipoFirma: 'Firma simple', visaciones: '👥 1' },
-  { nombre: '📝 Informe_final.docx', tipoDoc: 'Adjunto', materia: 'Documento secundario', expediente: '2026-00874-A-000010', documento: '72157', fechaCreacion: '09-01-2026', estado: 'Firmado', tipoFirma: 'Firma Gob', visaciones: '👥 1' },
+export interface DocFirma {
+  nombre: string; tipoDoc: string; materia: string; expediente: string; documento: string;
+  fechaCreacion: string; estado: string; tipoFirma: string; folio: string; fechaFirma: string;
+}
+export const documentosPorFirmar: DocFirma[] = [
+  // Por firmar (Pendiente / Fallido)
+  { nombre: 'prueba_1.pdf', tipoDoc: 'ANTECEDENTE', materia: 'Antecedente adjunto', expediente: '2026-00875-A-000053', documento: '97562', fechaCreacion: '16-06-2026', estado: 'Pendiente', tipoFirma: '—', folio: 'Sin folio', fechaFirma: '—' },
+  { nombre: 'test-document.pdf', tipoDoc: 'CIRCULAR', materia: 'Circular informativa', expediente: '2026-00094-A-000008', documento: '91824', fechaCreacion: '16-06-2026', estado: 'Pendiente', tipoFirma: '—', folio: 'Sin folio', fechaFirma: '—' },
+  { nombre: 'Documento sin título.pdf', tipoDoc: 'RESOLUCIÓN', materia: 'Resolución exenta', expediente: '2026-00874-A-000058', documento: '97470', fechaCreacion: '11-06-2026', estado: 'Pendiente', tipoFirma: 'Firma Gob', folio: 'Sin folio', fechaFirma: '—' },
+  { nombre: 'test-document.pdf', tipoDoc: 'OFICIO', materia: 'Oficio de respuesta', expediente: '2026-00094-A-000019', documento: '97453', fechaCreacion: '10-06-2026', estado: 'Pendiente', tipoFirma: '—', folio: 'Sin folio', fechaFirma: '—' },
+  { nombre: 'Prueba_tareas.pdf', tipoDoc: 'OFICIO', materia: 'Solicitud de firma', expediente: '2026-00094-A-000009', documento: '92833', fechaCreacion: '08-05-2026', estado: 'Pendiente', tipoFirma: '—', folio: 'Sin folio', fechaFirma: '—' },
+  { nombre: '30mb.pdf', tipoDoc: 'RESOLUCIÓN', materia: 'Resolución de archivo', expediente: '2026-00094-A-000003', documento: '91732', fechaCreacion: '24-04-2026', estado: 'Fallido', tipoFirma: 'Firma Gob', folio: 'Sin folio', fechaFirma: '—' },
+  { nombre: '10mb.pdf', tipoDoc: 'RESOLUCIÓN', materia: 'Resolución de cierre', expediente: '2026-00094-A-000003', documento: '91730', fechaCreacion: '24-04-2026', estado: 'Fallido', tipoFirma: 'Firma Gob', folio: 'Sin folio', fechaFirma: '—' },
+  // Procesados (Procesando)
+  { nombre: 'prueba_1.pdf', tipoDoc: 'ANTECEDENTE', materia: 'Antecedente adjunto', expediente: '2026-00875-S-000002', documento: '73820', fechaCreacion: '10-06-2026', estado: 'Procesando', tipoFirma: 'Firma simple', folio: 'Sin folio', fechaFirma: '—' },
+  { nombre: 'Prueba_tareas.pdf', tipoDoc: 'RESOLUCIÓN', materia: 'Preparar doc con anexo para firmar', expediente: '2025-00874-A-000089', documento: '67148', fechaCreacion: '02-06-2026', estado: 'Procesando', tipoFirma: 'Firma Gob', folio: 'Sin folio', fechaFirma: '—' },
+  // Firmados (Firmado)
+  { nombre: 'Documento copia.pdf', tipoDoc: 'RESOLUCIÓN', materia: 'Resolución firmada 2', expediente: '2026-00874-A-000058', documento: '97468', fechaCreacion: '10-06-2026', estado: 'Firmado', tipoFirma: 'Firma Gob', folio: '2026-00874-RES-000010', fechaFirma: '11-06-2026' },
+  { nombre: 'Documento copia.pdf', tipoDoc: 'RESOLUCIÓN', materia: 'Resolución firmada', expediente: '2026-00874-A-000058', documento: '97466', fechaCreacion: '10-06-2026', estado: 'Firmado', tipoFirma: 'Firma Gob', folio: '2026-00874-RES-000009', fechaFirma: '11-06-2026' },
+  { nombre: '1366_2000.pdf', tipoDoc: 'OFICIO', materia: 'Oficio firmado', expediente: '2026-00094-A-000018', documento: '93700', fechaCreacion: '31-05-2026', estado: 'Firmado', tipoFirma: 'Firma simple', folio: 'Sin folio', fechaFirma: '01-06-2026' },
+  { nombre: 'archive.pdf', tipoDoc: 'OFICIO', materia: 'Oficio firmado 2', expediente: '2026-00094-A-000017', documento: '93691', fechaCreacion: '31-05-2026', estado: 'Firmado', tipoFirma: 'Firma simple', folio: 'Sin folio', fechaFirma: '01-06-2026' },
 ];
 
 // ---- Preparación de documentos (expediente) ----
@@ -596,7 +602,8 @@ export const navItems: NavItem[] = [
 ];
 
 // ---- Roles y menús permitidos (forma MINVU). Claves = 'key' de navItems ----
-export const ROLES = ['Administrador General', 'Oficial de Partes', 'Administrador de Procesos', 'Auditor', 'Usuario General', 'Ciudadano'];
+// ponytail: solo se muestran estos 3 roles en el login. roleRoutes conserva los demás por si se reactivan.
+export const ROLES = ['Administrador General', 'Oficial de Partes', 'Ciudadano'];
 
 export const roleRoutes: Record<string, string[]> = {
   'Administrador General': ['inicio', 'reportes', 'dashboard', 'ingresos', 'buscadores', 'bandeja', 'firma', 'oficina-partes', 'mantenedores', 'auditoria'],
