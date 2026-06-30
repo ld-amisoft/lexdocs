@@ -355,6 +355,20 @@ export const porResolver: Solicitud[] = [
     detalles: 'Documento listo para visación o firma. Revisar antes de enviar.' },
 ];
 
+// -- Tareas rechazadas (Oficina de Partes): tareas devueltas, todas vencidas -> modal Resolver --
+export const tareasRechazadas: Solicitud[] = [
+  { variante: 'revision', titulo: 'Revisión documento N°18 - [Devolución]Revisión', expedienteLabel: '2026-00094-A-000018 trámite',
+    solicitadoPor: 'Dayana Nieto', fechaSolicitud: '30-04-2026, 09:38', asignadoPor: 'Dayana Nieto', fechaAsignacion: '30-04-2026, 10:02',
+    materia: 'Revisión de antecedentes', tipoDoc: 'RESOLUCIÓN', fechaLimite: '30-04-2026, 17:00', estado: 'Vencida', estadoTexto: 'Vencida hace 60 días',
+    docPrincipal: 'Documento sin título.pdf', anexos: [], historial: [histDeriv('30-04-26 10:02', 'Revisión')],
+    detalles: 'Tarea devuelta por la unidad de destino. Revisar observaciones y reasignar.' },
+  { variante: 'revision', titulo: 'Revisión documento N°22 - [Devolución]Distribución', expedienteLabel: '2026-00094-A-000022 distribución',
+    solicitadoPor: 'Dayana Nieto', fechaSolicitud: '12-05-2026, 11:20', asignadoPor: 'Dayana Nieto', fechaAsignacion: '12-05-2026, 11:45',
+    materia: 'Distribución de oficio', tipoDoc: 'OFICIO', fechaLimite: '12-05-2026, 18:00', estado: 'Vencida', estadoTexto: 'Vencida hace 48 días',
+    docPrincipal: 'Oficio_distribucion.pdf', anexos: [], historial: [histDeriv('12-05-26 11:45', 'Distribución')],
+    detalles: 'Distribución rechazada: unidad incorrecta. Corregir destino.' },
+];
+
 // -- Mis Pendientes / Historial (tarjetas con "ojo" -> modal solo lectura) --
 export interface SolicitudLista {
   titulo: string; modalTitulo: string;
@@ -593,6 +607,11 @@ export const roleRoutes: Record<string, string[]> = {
   'Ciudadano': ['inicio', 'ingresos', 'buscadores', 'bandeja', 'firma'],
 };
 
+// Restricción a nivel de submenú por rol (clave = ruta del hijo). Si un rol no aparece, ve todos los hijos.
+export const roleChildren: Record<string, string[]> = {
+  'Ciudadano': ['ingresos/documento', 'buscador', 'bandeja/por-resolver', 'bandeja/mis-pendientes'],
+};
+
 // ---- Bandejas de Oficina de Partes (un dataset por submenú) ----
 export const oficinaBandejas: Record<string, { titulo: string; desc: string; columns: Column[]; rows: Record<string, any>[] }> = {
   entrante: { titulo: 'Documentos entrantes', desc: 'Documentos recibidos pendientes de derivar.',
@@ -624,9 +643,81 @@ export const oficinaBandejas: Record<string, { titulo: string; desc: string; col
     rows: [
       { documento: 'OFICIO-2026-1088', destino: 'Departamento Jurídico', motivo: 'Unidad incorrecta', fecha: '19-06-2026', estado: 'Rechazado' },
     ]},
+  // ponytail: pre-ingreso usa su propio componente (pre-ingreso.ts); estas filas/columnas las consume él.
   'tareas-rechazadas': { titulo: 'Tareas rechazadas', desc: 'Tareas devueltas al remitente.',
     columns: [{ key: 'tarea', label: 'Tarea' }, { key: 'asignado', label: 'Asignado a' }, { key: 'motivo', label: 'Motivo' }, { key: 'fecha', label: 'Fecha' }, { key: 'estado', label: 'Estado', type: 'badge' }],
     rows: [
       { tarea: 'Revisión OFICIO-2026-1088', asignado: 'Marta Soto', motivo: 'Falta antecedente', fecha: '18-06-2026', estado: 'Rechazado' },
     ]},
 };
+
+// ---- Pre Ingreso (Oficina de Partes) ----
+export const tiposDocumento = ['ANTECEDENTE', 'CIRCULAR', 'OFICIO', 'RESOLUCIÓN', 'MEMORÁNDUM'];
+
+export const preIngresoColumns: Column[] = [
+  { key: 'expediente', label: 'Expediente' }, { key: 'numero', label: 'Número documento' },
+  { key: 'materia', label: 'Materia documento' }, { key: 'origen', label: 'Origen (de)' },
+  { key: 'fecha', label: 'Fecha ingreso' }, { key: 'para', label: 'Para' }, { key: 'ingresadoPor', label: 'Ingresado por' },
+];
+export const preIngresoRows: Record<string, any>[] = [
+  { expediente: 'Sin expediente', numero: 'DOC-1024', materia: 'Solicitud de certificado', origen: 'Ventanilla digital', fecha: '19-05-2026', para: '-', ingresadoPor: 'Dayana Nieto' },
+  { expediente: 'Sin expediente', numero: '-', materia: 'Consulta ciudadana', origen: 'Correo institucional', fecha: '11-02-2026', para: '-', ingresadoPor: 'admin' },
+  { expediente: 'Sin expediente', numero: '-', materia: 'Antecedentes adjuntos', origen: '-', fecha: '11-02-2026', para: '-', ingresadoPor: 'M. Soto' },
+  { expediente: 'Sin expediente', numero: '-', materia: 'Derivación interna', origen: '-', fecha: '11-02-2026', para: '-', ingresadoPor: 'C. Díaz' },
+  { expediente: 'Sin expediente', numero: '-', materia: 'Oficio de respuesta', origen: '-', fecha: '11-02-2026', para: '-', ingresadoPor: 'C. Díaz' },
+];
+export const preIngresoAcciones = ['Adjuntar documento', 'Visualizar', 'Historial', 'Asignar a Expediente', 'Abrir QR Individual', 'Eliminar'];
+export const preIngresoAccionesIconos: Record<string, string> = {
+  'Adjuntar documento': 'paperclip', 'Visualizar': 'eye', 'Historial': 'clock',
+  'Asignar a Expediente': 'folder', 'Abrir QR Individual': 'monitor', 'Eliminar': 'trash',
+};
+
+// ---- Ingreso Manual (Oficina de Partes) ----
+export const manualColumns: Column[] = [
+  { key: 'expediente', label: 'Expediente' }, { key: 'correlativo', label: 'Correlativo manual interno' },
+  { key: 'materia', label: 'Materia documento' }, { key: 'fecha', label: 'Fecha ingreso' }, { key: 'ingresadoPor', label: 'Ingresado por' },
+];
+export const manualRows: Record<string, any>[] = [
+  { expediente: '2026-00874-A-000029', correlativo: '2026-00874-M:OFI-000002', materia: 'Numeración oficio salida', fecha: '10-02-2026', ingresadoPor: 'ldelgadillo' },
+  { expediente: '2026-00874-A-000029', correlativo: '2026-00874-M:OFI-000001', materia: 'Oficio conductor', fecha: '10-02-2026', ingresadoPor: 'ldelgadillo' },
+  { expediente: '2026-00874-A-000026', correlativo: '2026-00874-M:RES-000003', materia: 'Resolución exenta', fecha: '06-02-2026', ingresadoPor: 'admin' },
+  { expediente: '2026-00874-A-000026', correlativo: '2026-00874-M:RES-000004', materia: 'Resolución de archivo', fecha: '06-02-2026', ingresadoPor: 'admin' },
+];
+export const manualAcciones = ['Marcar como reservado', 'Actualizar doc principal', 'Visualizar', 'Historial', 'Abrir documento', 'Adjuntos', 'Abrir comprobante'];
+export const manualAccionesIconos: Record<string, string> = {
+  'Marcar como reservado': 'lock', 'Actualizar doc principal': 'paperclip', 'Visualizar': 'eye',
+  'Historial': 'clock', 'Abrir documento': 'file', 'Adjuntos': 'folder', 'Abrir comprobante': 'clipboard-list',
+};
+export const manualNumeracionColumns: Column[] = [
+  { key: 'materia', label: 'Materia' }, { key: 'tipo', label: 'Tipo documento' }, { key: 'expediente', label: 'Expediente' },
+  { key: 'estado', label: 'Estado', type: 'badge' }, { key: 'fecha', label: 'Fecha' },
+];
+// ---- Distribuciones rechazadas (Oficina de Partes) ----
+export const distRechColumns: Column[] = [
+  { key: 'expediente', label: 'Expediente' }, { key: 'numero', label: 'Número documento' },
+  { key: 'materia', label: 'Materia documento' }, { key: 'origen', label: 'Origen (de)' },
+  { key: 'fecha', label: 'Fecha ingreso' }, { key: 'para', label: 'Para' }, { key: 'ingresadoPor', label: 'Ingresado por' },
+  { key: 'despachos', label: 'Despachos', type: 'icon', icon: 'swap' },
+];
+export const distRechRows: Record<string, any>[] = [
+  { expediente: '2026-00094-PCM-000001', numero: '-', materia: 'Solicitud de revisión', origen: '-', fecha: '15-04-2026', para: '-', ingresadoPor: 'Dayana Nieto' },
+  { expediente: '2025-00094-A-000010', numero: '-', materia: 'Antecedentes adjuntos', origen: '-', fecha: '2025-12-30', para: '-', ingresadoPor: 'Dayana Nieto' },
+];
+export const distRechAcciones = ['Marcar como reservado', 'Visualizar', 'Historial', 'Abrir documento', 'Adjuntos', 'DocDigital', 'Despacho Manual', 'Notificación Correo'];
+export const distRechAccionesIconos: Record<string, string> = {
+  'Marcar como reservado': 'lock', 'Visualizar': 'eye', 'Historial': 'clock', 'Abrir documento': 'file',
+  'Adjuntos': 'folder', 'DocDigital': 'file-text', 'Despacho Manual': 'forward', 'Notificación Correo': 'mail',
+};
+export interface DespachoEvento { tipo: 'Distribución' | 'Rechazo'; fecha: string; autor: string; destinatarios?: string; rol?: string; motivo?: string; }
+export const despachosHistorial: DespachoEvento[] = [
+  { tipo: 'Distribución', fecha: '05-05-2026 12:12:23', autor: 'Juan Pérez', destinatarios: 'Juan Pérez' },
+  { tipo: 'Rechazo', fecha: '05-05-2026 12:12:49', autor: 'Juan Pérez', rol: 'Oficial de Partes', motivo: 'Unidad incorrecta' },
+];
+
+export const manualNumeracionRows: Record<string, any>[] = [
+  { materia: 'Oficio conductor', tipo: 'OFICIO', expediente: '2026-00037-A-000002', estado: 'Pendiente numeración manual', fecha: '09-04-2026' },
+  { materia: 'Oficio de respuesta', tipo: 'OFICIO', expediente: '2026-00037-A-000002', estado: 'Pendiente numeración manual', fecha: '09-04-2026' },
+  { materia: 'Antecedentes', tipo: 'OFICIO', expediente: '2026-00037-A-000002', estado: 'Pendiente numeración manual', fecha: '09-04-2026' },
+  { materia: 'Circular informativa', tipo: 'CIRCULAR', expediente: '2026-00875-A-000052', estado: 'Pendiente numeración manual', fecha: '09-04-2026' },
+  { materia: 'Oficio de archivo', tipo: 'OFICIO', expediente: '2026-00875-A-000052', estado: 'Pendiente numeración manual', fecha: '09-04-2026' },
+];

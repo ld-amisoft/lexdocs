@@ -2,13 +2,15 @@ import { Component, computed, effect, inject, signal, untracked } from '@angular
 import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router, NavigationEnd } from '@angular/router';
 import { filter, map } from 'rxjs';
-import { navItems, roleRoutes, NavItem } from '../../shared/mock-data';
+import { navItems, roleRoutes, roleChildren, NavItem } from '../../shared/mock-data';
 import { Session } from '../../shared/session';
 import { Icon } from '../../shared/icon';
+import { DocViewerComponent } from '../../shared/doc-viewer';
+import { DocHistorialComponent } from '../../shared/doc-historial';
 
 @Component({
   selector: 'app-shell',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, Icon],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, Icon, DocViewerComponent, DocHistorialComponent],
   template: `
     <div class="shell">
       <aside class="sidebar">
@@ -53,6 +55,8 @@ import { Icon } from '../../shared/icon';
         </header>
         <main class="content"><router-outlet /></main>
       </div>
+      <app-doc-viewer />
+      <app-doc-historial />
     </div>
   `,
   styles: [`
@@ -108,7 +112,13 @@ export class Shell {
 
   nav = computed(() => {
     const permit = roleRoutes[this.session.role()] ?? [];
-    return navItems.filter(it => permit.includes(it.key) && !it.hidden);
+    const childWhitelist = roleChildren[this.session.role()];
+    return navItems
+      .filter(it => permit.includes(it.key) && !it.hidden)
+      .map(it => (it.children && childWhitelist)
+        ? { ...it, children: it.children.filter(c => childWhitelist.includes(c.ruta)) }
+        : it)
+      .filter(it => !it.children || it.children.length > 0);
   });
 
   usuario = computed(() => 'Dayana Nieto');

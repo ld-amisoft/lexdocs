@@ -43,7 +43,7 @@ import { Icon } from './icon';
                   @if (open() === ri) {
                     <div class="row-menu">
                       @for (a of menu(); track a) {
-                        <button [class.danger]="a === 'Eliminar'" (click)="pick(a, $event)">
+                        <button [class.danger]="a === 'Eliminar'" (click)="pick(a, ri, $event)">
                           @if (menuIcons()[a]; as ic) { <app-icon [name]="ic" [size]="15" /> }
                           {{ a }}
                         </button>
@@ -68,6 +68,7 @@ export class DataTable {
   menu = input<string[]>(['Ver detalle', 'Editar', 'Eliminar']);
   menuIcons = input<Record<string, string>>({});
   cellAction = output<{ key: string; index: number }>();
+  menuAction = output<{ action: string; index: number }>();
 
   open = signal<number | null>(null);
   selected = signal<Set<number>>(new Set());
@@ -83,9 +84,10 @@ export class DataTable {
     e.stopPropagation();
     this.open.set(this.open() === i ? null : i);
   }
-  pick(_action: string, e: Event) {
+  pick(action: string, index: number, e: Event) {
     e.stopPropagation();
-    this.open.set(null); // prototipo: la acción solo cierra el menú
+    this.open.set(null);
+    this.menuAction.emit({ action, index });
   }
   @HostListener('document:click') close() { this.open.set(null); }
 

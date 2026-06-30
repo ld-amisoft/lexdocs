@@ -1,7 +1,9 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Icon } from '../../shared/icon';
 import { expedientes } from '../../shared/mock-data';
+import { DocViewer } from '../../shared/doc-viewer';
+import { Session } from '../../shared/session';
 
 // Detalle de expediente (forma MINVU, skin LexDocs). Tabs: Expediente, Comentarios, Preparar Docs, Plazos Hitos.
 @Component({
@@ -87,7 +89,7 @@ import { expedientes } from '../../shared/mock-data';
 
       <div class="card panel">
         <div class="tabs">
-          @for (t of tabs; track t) { <button class="tab" [class.active]="t === tab()" (click)="tab.set(t)">{{ t }}</button> }
+          @for (t of tabs(); track t) { <button class="tab" [class.active]="t === tab()" (click)="tab.set(t)">{{ t }}</button> }
         </div>
 
         @switch (tab()) {
@@ -99,10 +101,21 @@ import { expedientes } from '../../shared/mock-data';
                   <tr>
                     <td>{{ d.folio }}</td><td>{{ d.fecha }}</td><td>{{ d.tipo }}</td><td>{{ d.estado }}</td>
                     <td>{{ d.materia }} @if (d.reservado) { <span class="badge badge-red">Reservado</span> }</td>
-                    <td><button class="iconbtn"><app-icon name="file" [size]="16"/></button></td>
+                    <td><button class="iconbtn" (click)="viewer.open(d.folio + '.pdf')"><app-icon name="file" [size]="16"/></button></td>
                     <td>{{ d.respondeA }}</td>
                     <td class="acts"><app-icon name="message" [size]="15"/><app-icon name="lock" [size]="15"/><app-icon name="clock" [size]="15"/><app-icon name="users" [size]="15"/><app-icon name="search" [size]="15"/></td>
                   </tr>
+                }
+              </tbody>
+            </table>
+            <div class="pagination"><span>« Anterior</span><span class="active">1</span><span>Siguiente »</span></div>
+          }
+          @case ('Participantes') {
+            <table class="data-table">
+              <thead><tr><th>Rut</th><th>Nombre</th><th>Tipo Parte</th><th>Tipo de Actor Relacionado</th><th>Tipo Persona</th><th>Correo</th></tr></thead>
+              <tbody>
+                @for (p of participantes; track $index) {
+                  <tr><td>{{ p.rut }}</td><td>{{ p.nombre }}</td><td>{{ p.tipoParte }}</td><td>{{ p.tipoActor }}</td><td>{{ p.tipoPersona }}</td><td>{{ p.correo }}</td></tr>
                 }
               </tbody>
             </table>
@@ -122,11 +135,26 @@ import { expedientes } from '../../shared/mock-data';
               <div class="ci-foot"><small class="muted">0/6000 caracteres</small><button class="send"><app-icon name="send" [size]="16"/></button></div>
             </div>
           }
+          @case ('Historial') {
+            <table class="data-table hist">
+              <thead><tr><th>Fecha ↓</th><th>Usuario</th><th>Acción</th><th>Detalle</th></tr></thead>
+              <tbody>
+                @for (h of historial; track $index) {
+                  <tr>
+                    <td><b>{{ h.fecha }}</b> <span class="muted">/ {{ h.hora }}</span></td>
+                    <td class="muted">{{ h.usuario }}</td>
+                    <td class="muted">{{ h.accion }}</td>
+                    <td><span class="av-hist">JP</span> {{ h.detalle }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
           @case ('Preparar Docs') {
             <table class="data-table">
               <thead><tr><th>Fecha ingreso</th><th>Tipo documento</th><th>Materia</th><th>Documento</th><th>Adjunto</th><th>Acciones</th></tr></thead>
               <tbody>
-                <tr><td>06-04-2026</td><td>CIRCULAR</td><td>123</td><td><button class="iconbtn"><app-icon name="file" [size]="16"/></button></td><td>-</td>
+                <tr><td>06-04-2026</td><td>CIRCULAR</td><td>123</td><td><button class="iconbtn" (click)="viewer.open('circular-123.docx')"><app-icon name="file" [size]="16"/></button></td><td>-</td>
                   <td class="acts"><app-icon name="message" [size]="15"/><app-icon name="download" [size]="15"/><app-icon name="edit" [size]="15"/><app-icon name="trash" [size]="15"/><app-icon name="clock" [size]="15"/></td></tr>
               </tbody>
             </table>
@@ -159,6 +187,7 @@ import { expedientes } from '../../shared/mock-data';
     .url-row input { flex: 1; border: 1px solid var(--border); border-radius: 8px; padding: 9px 12px; font-family: monospace; font-size: 12px; color: var(--text-muted); }
     .acts { display: flex; gap: 12px; color: var(--brand-primary); align-items: center; }
     .acts app-icon { cursor: pointer; }
+    .av-hist { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--brand-amber, #F59E0B); color: #fff; font-size: 10px; font-weight: 700; margin-right: 8px; vertical-align: middle; }
     /* comentarios */
     .cmt { border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-bottom: 12px; }
     .cmt-top { display: flex; align-items: center; gap: 10px; }
@@ -206,12 +235,17 @@ import { expedientes } from '../../shared/mock-data';
   `],
 })
 export class ExpedienteDetalle {
+  viewer = inject(DocViewer);
   folio = inject(ActivatedRoute).snapshot.paramMap.get('folio') ?? '';
   exp = expedientes.find(e => e.folio === this.folio) ?? expedientes[0];
   get nombre() { return this.exp.procedimiento; }
 
+  private session = inject(Session);
   vista = signal<'tabs' | 'preparar'>('tabs');
-  tabs = ['Expediente', 'Comentarios', 'Preparar Docs', 'Plazos Hitos'];
+  // El Ciudadano solo ve Expediente y Participantes.
+  tabs = computed(() => this.session.role() === 'Ciudadano'
+    ? ['Expediente', 'Participantes']
+    : ['Expediente', 'Participantes', 'Comentarios', 'Historial', 'Preparar Docs', 'Plazos Hitos']);
   tab = signal('Expediente');
 
   docs = [
@@ -220,9 +254,19 @@ export class ExpedienteDetalle {
     { folio: 'Sin folio', fecha: '31-03-2026', tipo: 'ANTECEDENTE', estado: 'Público', materia: 'test', reservado: false, respondeA: '-' },
     { folio: 'Sin folio', fecha: '30-03-2026', tipo: 'prueba', estado: 'Pendiente de firma', materia: 'test', reservado: false, respondeA: '-' },
   ];
+  participantes = [
+    { rut: '22.222.222-2', nombre: 'María Soto', tipoParte: 'Solicitante', tipoActor: 'Extranjero', tipoPersona: 'Natural', correo: 'maria.soto@correo.cl' },
+    { rut: '15.345.678-9', nombre: 'Pedro Rojas', tipoParte: 'Representante', tipoActor: 'Nacional', tipoPersona: 'Natural', correo: 'pedro.rojas@correo.cl' },
+    { rut: '76.123.456-7', nombre: 'Constructora Andes SpA', tipoParte: 'Tercero', tipoActor: 'Nacional', tipoPersona: 'Jurídica', correo: 'contacto@andes.cl' },
+  ];
   comentarios = [
-    { autor: 'Juan Pérez', fecha: '26-06-26, 16:21', texto: 'test' },
-    { autor: 'Juan Pérez', fecha: '26-06-26, 16:21', texto: 'test' },
-    { autor: 'Juan Pérez', fecha: '26-06-26, 16:21', texto: 'test' },
+    { autor: 'Juan Pérez', fecha: '26-06-26, 16:21', texto: 'Se revisaron los antecedentes y el expediente está listo para pasar a la siguiente etapa.' },
+  ];
+  historial = [
+    { fecha: '30-06-2026', hora: '12:36:30', usuario: 'Juan Pérez', accion: 'Ingreso al expediente', detalle: `Ha ingresado al expediente ${this.exp.folio}.` },
+    { fecha: '01-06-2026', hora: '13:12:10', usuario: 'Juan Pérez', accion: 'Ingreso al expediente', detalle: `Ha ingresado al expediente ${this.exp.folio}.` },
+    { fecha: '01-06-2026', hora: '13:12:10', usuario: 'Juan Pérez', accion: 'Envío a firmar documento(s)', detalle: `Se enviaron a firmar 1 documento(s) del expediente ${this.exp.folio}.` },
+    { fecha: '01-06-2026', hora: '13:11:51', usuario: 'Juan Pérez', accion: 'Ingreso documento', detalle: `Se agregó OFICIO una "prueba" al expediente ${this.exp.folio}.` },
+    { fecha: '26-05-2026', hora: '15:49:29', usuario: 'Juan Pérez', accion: 'Expediente creado', detalle: 'Se creó el expediente N° 2073 (Expediente documental).' },
   ];
 }

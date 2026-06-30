@@ -1,8 +1,12 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { documentosBusqueda, organismos } from '../../shared/mock-data';
+import { DocViewer } from '../../shared/doc-viewer';
+import { DocHistorial } from '../../shared/doc-historial';
+import { Icon } from '../../shared/icon';
 
 @Component({
   selector: 'app-buscador-documentos',
+  imports: [Icon],
   template: `
     <div class="head"><h1 class="page-title">Buscador de documentos</h1>
       <select class="sort"><option>Más relevante</option><option>Más reciente</option><option>Más antiguo</option></select>
@@ -37,11 +41,11 @@ import { documentosBusqueda, organismos } from '../../shared/mock-data';
         <div class="rcount muted">Se han encontrado <b>{{ resultados().length }}</b> resultados</div>
         @for (d of resultados(); track d.nombre) {
           <div class="rcard">
-            <div class="rtop">{{ d.nombre }}</div>
+            <div class="rtop link" (click)="viewer.open(d.nombre)">{{ d.nombre }}</div>
             <div class="rgrid">
               <span><b>Materia:</b> {{ d.materia }}</span><span><b>Tipo:</b> {{ d.tipo }}</span><span><b>Autor:</b> {{ d.autor }}</span><span><b>Fecha ingreso:</b> {{ d.fechaIngreso }}</span>
               <span><b>N° Documento:</b> {{ d.nDoc }}</span><span><b>Año:</b> {{ d.anio }}</span><span><b>Origen:</b> {{ d.origen }}</span><span><b>Para:</b> {{ d.para }}</span>
-              <span><b>Tipo de operación:</b> {{ d.operacion }}</span><span><b>Historial:</b> 🕓</span>
+              <span><b>Tipo de operación:</b> {{ d.operacion }}</span><span class="hist-cell"><b>Historial:</b> <button class="hist-btn" (click)="dochist.open(d.nombre)"><app-icon name="clock" [size]="16"/></button></span>
             </div>
           </div>
         }
@@ -65,13 +69,19 @@ import { documentosBusqueda, organismos } from '../../shared/mock-data';
     .rcount { text-align: right; }
     .rcard { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 16px 20px; box-shadow: var(--shadow); }
     .rtop { font-weight: 700; margin-bottom: 12px; }
+    .rtop.link { color: var(--brand-primary); cursor: pointer; }
+    .rtop.link:hover { text-decoration: underline; }
     .rgrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px 24px; font-size: 13px; }
     .rgrid b { font-weight: 600; }
     @media (max-width: 1100px) { .rgrid { grid-template-columns: repeat(2, 1fr); } }
     @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
+    .hist-cell { display: inline-flex; align-items: center; gap: 6px; }
+    .hist-btn { background: none; border: none; cursor: pointer; color: var(--brand-primary); display: inline-flex; padding: 0; }
   `],
 })
 export class BuscadorDocumentos {
+  viewer = inject(DocViewer);
+  dochist = inject(DocHistorial);
   organismos = organismos;
   texto = signal('');
   tipo = signal('Todos');
