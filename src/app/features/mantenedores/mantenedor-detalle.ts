@@ -61,7 +61,7 @@ import { mantenedorData, MantDef } from '../../shared/mock-data';
     .general { display: flex; align-items: center; gap: 24px; margin-bottom: 16px; }
     .general .g-label { color: var(--brand-primary); font-weight: 700; font-size: 13px; }
     .general .g-text { flex: 1; color: var(--text-muted); }
-    .filtros-card { display: flex; justify-content: space-between; align-items: flex-end; gap: 18px; flex-wrap: wrap; }
+    .filtros-card { display: flex; justify-content: space-between; align-items: flex-end; gap: 18px; flex-wrap: wrap; margin-bottom: 20px; }
     .filtros { display: flex; gap: 16px; flex-wrap: wrap; flex: 1; align-items: flex-end; }
     .field { display: flex; flex-direction: column; gap: 5px; min-width: 180px; }
     .field label { font-size: 12px; color: var(--text-muted); font-weight: 600; }

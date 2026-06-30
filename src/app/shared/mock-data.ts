@@ -312,6 +312,80 @@ export const opEntrante = [
   { expediente: 'Sin expediente', nDoc: '-', materia: 'Memorándum interno', origen: '-', fechaIngreso: '13-02-2026', para: '-', ingresadoPor: 'Dayana Nieto' },
 ];
 
+// ---- Bandeja de Entrada (Por Resolver / Mis Pendientes / Historial) ----
+export interface SolicitudHist { autor: string; fecha: string; texto: string; }
+export interface Solicitud {
+  variante: 'revision' | 'visar-firmar';
+  titulo: string; expedienteLabel: string;
+  solicitadoPor: string; fechaSolicitud: string; asignadoPor: string; fechaAsignacion: string;
+  materia: string; tipoDoc: string;
+  fechaLimite: string; estado: string; estadoTexto: string;
+  docPrincipal: string; anexos: string[];
+  historial: SolicitudHist[]; detalles: string;
+}
+
+const histDeriv = (fecha: string, instr: string): SolicitudHist =>
+  ({ autor: 'Dayana Nieto', fecha, texto: `Solicitud derivada a Dayana Nieto con la instrucción de "${instr}"` });
+
+export const porResolver: Solicitud[] = [
+  { variante: 'revision', titulo: 'Revisión documento N°17 - Distribución', expedienteLabel: '2026-00094-A-000017 test',
+    solicitadoPor: 'Dayana Nieto', fechaSolicitud: '23-04-2026, 15:57', asignadoPor: 'Dayana Nieto', fechaAsignacion: '23-04-2026, 15:57',
+    materia: 'Ingreso expediente', tipoDoc: 'CIRCULAR', fechaLimite: '23-04-2026, 15:57', estado: 'Vencida', estadoTexto: 'Vencida hace 67 días',
+    docPrincipal: 'PL2.pdf', anexos: [], historial: [histDeriv('23-04-26 15:57', 'Distribución')],
+    detalles: 'Documento recibido por Oficina de Partes. Favor revisar antecedentes y distribuir a la unidad correspondiente.' },
+  { variante: 'revision', titulo: 'Visación documento N°15 - Solicitud de Visación', expedienteLabel: '2026-00094-A-000018 prueba expediente',
+    solicitadoPor: 'Dayana Nieto', fechaSolicitud: '08-06-2026, 12:46', asignadoPor: 'Dayana Nieto', fechaAsignacion: '16-06-2026, 11:38',
+    materia: 'Solicitud de visación', tipoDoc: 'OFICIO', fechaLimite: '16-06-2026, 10:38', estado: 'Vencida', estadoTexto: 'Vencida hace 14 días',
+    docPrincipal: 'Oficio_visacion.pdf', anexos: ['Anexo_1.pdf'], historial: [histDeriv('16-06-26 11:38', 'Visación')],
+    detalles: 'Requiere visación de la jefatura antes de continuar el trámite.' },
+  { variante: 'revision', titulo: 'Revisión documento N°17 - Revisión', expedienteLabel: '2026-00094-A-000020 asd',
+    solicitadoPor: 'Dayana Nieto', fechaSolicitud: '16-06-2026, 10:41', asignadoPor: 'Dayana Nieto', fechaAsignacion: '16-06-2026, 10:41',
+    materia: 'Revisión de antecedentes', tipoDoc: 'OFICIO', fechaLimite: '16-06-2026, 17:00', estado: 'Vencida', estadoTexto: 'Vencida hace 13 días',
+    docPrincipal: 'Documento_revision.pdf', anexos: [], historial: [histDeriv('16-06-26 10:41', 'Revisión')],
+    detalles: 'Revisar conformidad de los antecedentes adjuntos.' },
+  { variante: 'revision', titulo: 'Revisión documento N°18 - Revisión', expedienteLabel: '2026-00094-A-000020 asd',
+    solicitadoPor: 'Dayana Nieto', fechaSolicitud: '16-06-2026, 10:41', asignadoPor: 'Dayana Nieto', fechaAsignacion: '16-06-2026, 10:41',
+    materia: 'Observación de documento', tipoDoc: 'OFICIO', fechaLimite: '16-06-2026, 17:00', estado: 'Vencida', estadoTexto: 'Vencida hace 13 días',
+    docPrincipal: 'Documento_obs.pdf', anexos: [], historial: [histDeriv('16-06-26 10:41', 'Revisión')],
+    detalles: 'Se observan inconsistencias en el folio. Verificar.' },
+  { variante: 'visar-firmar', titulo: 'Enviar a visar o firmar documento N°21 - [Revisar]Solicitud de Visación', expedienteLabel: '2026-00094-S-000001 aa',
+    solicitadoPor: 'Dayana Nieto', fechaSolicitud: '19-06-2026, 10:06', asignadoPor: 'Dayana Nieto', fechaAsignacion: '19-06-2026, 10:07',
+    materia: 'Solicitud de visación', tipoDoc: 'OFICIO', fechaLimite: '19-06-2026, 18:00', estado: 'Vencida', estadoTexto: 'Vencida hace 10 días',
+    docPrincipal: 'test-document.pdf', anexos: [], historial: [histDeriv('19-06-26 10:07', 'Revisar')],
+    detalles: 'Documento listo para visación o firma. Revisar antes de enviar.' },
+];
+
+// -- Mis Pendientes / Historial (tarjetas con "ojo" -> modal solo lectura) --
+export interface SolicitudLista {
+  titulo: string; modalTitulo: string;
+  ultimaActividad: string; procedimiento: string;
+  fechaCreacion: string; fechaResolucion: string; estado: string;
+  docPrincipal: string; anexos: string[];
+  historial: SolicitudHist[]; detalles: string;
+  infoTipoDoc: string; infoMateria: string;
+}
+const pend = (n: number, ult: string, proc: string, creacion: string): SolicitudLista =>
+  ({ titulo: `Visación N°${n} - Solicitud de Visación`, modalTitulo: `N°${n} - Solicitud de Visación`,
+     ultimaActividad: ult, procedimiento: proc, fechaCreacion: creacion, fechaResolucion: creacion.replace(/, .*/, ', 18:00'),
+     estado: 'PENDIENTE', docPrincipal: 'aaaa.pdf', anexos: [], historial: [histDeriv(creacion, 'Visación')],
+     detalles: 'Solicitud pendiente de visación.', infoTipoDoc: 'OFICIO', infoMateria: 'Solicitud de visación' });
+export const misPendientes: SolicitudLista[] = [
+  pend(8, '[Revisión] - Solicitud resuelta con el comentario: conforme', 'Visación simple', '27-03-2026, 11:42'),
+  pend(6, '[Revisión] - Solicitud resuelta con el comentario: conforme', 'Expediente documental', '27-03-2026, 11:22'),
+  pend(9, '[Solicitud de Visación] - Solicitud reenviada al emisor', 'Visación simple', '27-03-2026, 11:47'),
+  pend(5, '[Solicitud de Visación] - Solicitud reenviada al emisor', 'Prueba combinado', '27-03-2026, 11:11'),
+  pend(4, '[Solicitud de Visación] - Solicitud reenviada al emisor', 'Expediente documental', '25-03-2026, 16:29'),
+  pend(3, '[Solicitud de Visación] - Solicitud reenviada al emisor', 'Visación simple', '25-03-2026, 15:10'),
+];
+export const historialSolicitudes: SolicitudLista[] = [
+  { titulo: 'Visación N°17 - Solicitud de Visación', modalTitulo: 'N°17 - Solicitud de Visación', ultimaActividad: 'Solicitud derivada con la instrucción de Revisión', procedimiento: '', fechaCreacion: '16-06-2026, 10:41', fechaResolucion: '16-06-2026, 18:00', estado: 'PENDIENTE', docPrincipal: 'test-document.pdf', anexos: [], historial: [histDeriv('16-06-26 10:41', 'Revisión')], detalles: 'En espera de revisión.', infoTipoDoc: 'OFICIO', infoMateria: 'Solicitud de visación' },
+  { titulo: 'Visación N°18 - Solicitud de Visación', modalTitulo: 'N°18 - Solicitud de Visación', ultimaActividad: 'Solicitud derivada con la instrucción de Revisión', procedimiento: '', fechaCreacion: '16-06-2026, 10:41', fechaResolucion: '16-06-2026, 18:00', estado: 'PENDIENTE', docPrincipal: 'test-document.pdf', anexos: [], historial: [histDeriv('16-06-26 10:41', 'Revisión')], detalles: 'En espera de revisión.', infoTipoDoc: 'OFICIO', infoMateria: 'Solicitud de visación' },
+  { titulo: 'Revisión N°24 - Solicitud de Revisión', modalTitulo: 'N°24 - Solicitud de Revisión', ultimaActividad: '[Revisión] - Solicitud resuelta sin comentarios', procedimiento: '', fechaCreacion: '16-06-2026, 12:25', fechaResolucion: '16-06-2026, 18:00', estado: 'RESUELTA', docPrincipal: 'Documento_revision.pdf', anexos: [], historial: [histDeriv('16-06-26 12:25', 'Revisión'), { autor: 'Dayana Nieto', fecha: '16-06-26 13:10', texto: 'Revisión terminada sin comentarios.' }], detalles: 'Revisión conforme.', infoTipoDoc: 'OFICIO', infoMateria: 'Revisión de antecedentes' },
+  { titulo: 'Visación N°19 - Solicitud de Visación', modalTitulo: 'N°19 - Solicitud de Visación', ultimaActividad: '[Revisión] - Solicitud resuelta sin comentarios', procedimiento: '', fechaCreacion: '16-06-2026, 12:28', fechaResolucion: '16-06-2026, 18:00', estado: 'PENDIENTE', docPrincipal: 'test-document.pdf', anexos: [], historial: [histDeriv('16-06-26 12:28', 'Revisión')], detalles: 'En espera de visación.', infoTipoDoc: 'OFICIO', infoMateria: 'Solicitud de visación' },
+  { titulo: 'Visación N°20 - Solicitud de Visación', modalTitulo: 'N°20 - Solicitud de Visación', ultimaActividad: 'Solicitud enviada a archivar con el motivo: duplicado', procedimiento: '', fechaCreacion: '16-06-2026, 12:29', fechaResolucion: '16-06-2026, 18:00', estado: 'RESUELTA', docPrincipal: 'Oficio_visacion.pdf', anexos: [], historial: [histDeriv('16-06-26 12:29', 'Revisión'), { autor: 'Dayana Nieto', fecha: '16-06-26 14:00', texto: 'Solicitud archivada (duplicado).' }], detalles: 'Archivada por duplicidad.', infoTipoDoc: 'OFICIO', infoMateria: 'Solicitud de visación' },
+  { titulo: 'Revisión N°22 - Solicitud de Revisión', modalTitulo: 'N°22 - Solicitud de Revisión', ultimaActividad: '[Revisión] - Solicitud resuelta con comentarios', procedimiento: '', fechaCreacion: '15-06-2026, 09:40', fechaResolucion: '15-06-2026, 18:00', estado: 'RESUELTA', docPrincipal: 'Documento_revision.pdf', anexos: [], historial: [histDeriv('15-06-26 09:40', 'Revisión'), { autor: 'Dayana Nieto', fecha: '15-06-26 11:20', texto: 'Revisión terminada con comentarios.' }], detalles: 'Revisión con observaciones menores.', infoTipoDoc: 'OFICIO', infoMateria: 'Revisión de antecedentes' },
+];
+
 // ---- Portal Ciudadano ----
 // ---- Reportes y Estadísticas ----
 export const reportesCards = [
@@ -482,7 +556,11 @@ export const navItems: NavItem[] = [
     { label: 'Documentos', ruta: 'buscador/documentos' },
     { label: 'Expedientes', ruta: 'buscador' },
   ]},
-  { key: 'bandeja', label: 'Bandeja de Entrada', icon: 'inbox', ruta: 'bandeja' },
+  { key: 'bandeja', label: 'Bandeja de Entrada', icon: 'inbox', children: [
+    { label: 'Por Resolver', ruta: 'bandeja/por-resolver' },
+    { label: 'Mis Pendientes', ruta: 'bandeja/mis-pendientes' },
+    { label: 'Historial', ruta: 'bandeja/historial' },
+  ]},
   { key: 'firma', label: 'Bandeja de Firmas', icon: 'pen-tool', ruta: 'firma' },
   { key: 'oficina-partes', label: 'Oficina de Partes', icon: 'building', children: [
     { label: 'Entrante', ruta: 'oficina-partes/entrante' },

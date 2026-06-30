@@ -159,6 +159,11 @@ button { font-family: inherit; cursor: pointer; }
 .pill { border: 1px solid var(--border); background: #fff; border-radius: 999px; padding: 6px 14px; font-size: 12px; font-weight: 600; color: var(--text-muted); }
 .pill.active { background: var(--brand-primary); color: #fff; border-color: var(--brand-primary); }
 
+/* ---- Tabs segmentados (pill grande, ancho completo) ---- */
+.seg-tabs { display: flex; gap: 12px; margin-bottom: 18px; }
+.seg-tabs button { flex: 1; border: 1px solid var(--border); background: #fff; border-radius: 999px; padding: 12px; font-weight: 700; font-size: 13px; color: var(--text-muted); }
+.seg-tabs button.on { background: var(--brand-primary); color: #fff; border-color: var(--brand-primary); }
+
 /* ---- Paginación ---- */
 .pagination { display: flex; gap: 6px; justify-content: center; align-items: center; padding: 16px; }
 .pagination span { padding: 6px 11px; border-radius: 8px; font-size: 13px; color: var(--text-muted); cursor: pointer; }

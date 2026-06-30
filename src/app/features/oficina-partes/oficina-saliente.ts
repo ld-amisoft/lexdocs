@@ -102,9 +102,7 @@ type Tab = 'firmados' | 'publicados' | 'despachados';
     .field-row input { padding-left: 10px; padding-right: 10px; }
     .f-acciones { display: flex; gap: 8px; margin-top: 6px; }
     .op-main { flex: 1; min-width: 0; }
-    .seg-tabs { display: flex; gap: 12px; margin-bottom: 18px; }
-    .seg-tabs button { flex: 1; border: 1px solid var(--border); background: #fff; border-radius: 999px; padding: 12px; font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: .03em; color: var(--text-muted); }
-    .seg-tabs button.on { background: var(--brand-primary); color: #fff; border-color: var(--brand-primary); }
+    .seg-tabs button { text-transform: uppercase; letter-spacing: .03em; }
     .op-bulk { display: flex; gap: 10px; margin-bottom: 12px; }
     .modal-ov { position: fixed; inset: 0; background: rgba(16,24,40,.5); display: grid; place-items: center; z-index: 50; }
     .modal { background: #fff; border-radius: var(--radius); width: 540px; max-width: 92vw; box-shadow: 0 12px 40px rgba(16,24,40,.25); }
